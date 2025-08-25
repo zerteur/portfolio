@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Léo Proudhom - IT Project Manager</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.3.4/vue.global.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #2d3748; overflow: hidden; height: 100vh; }
+    .app-container { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; }
+    .center-hub { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 140px; height: 140px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 32px rgba(0, 0, 0, .15); z-index: 100; transition: .3s; }
+    .profile-image { width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: #fff; font-weight: 600; letter-spacing: 2px; transition: all .3s ease-out; }
+    .profile-image.mail-button { background: #fff; color: #667eea; font-size: 1rem; font-weight: 500; text-decoration: none; display: flex; flex-direction: column; gap: 5px; padding: 10px; text-align: center; animation: pulse 2s infinite; }
+    .profile-image.mail-button:hover { background: #f7fafc; transform: scale(1.05); }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+    .orbital-circle { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 500px; height: 500px; border: 2px solid rgba(255, 255, 255, .3); border-radius: 50%; z-index: 50; pointer-events: none; transition: .5s ease-out; }
+    .orbital-element { position: absolute; width: 90px; height: 90px; background: #fff; border-radius: 18px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: .3s ease-out; box-shadow: 0 6px 25px rgba(0, 0, 0, .1); opacity: 0; transform: scale(0); font-size: .8rem; font-weight: 600; text-align: center; padding: 10px; line-height: 1.2; color: #4a5568; pointer-events: all; }
+    .orbital-element.visible { opacity: 1; transform: scale(1); }
+    .orbital-element:hover { transform: scale(1.1); box-shadow: 0 8px 30px rgba(0, 0, 0, .15); background: #f7fafc; }
+    .orbital-element.active { background: #667eea; color: #fff; transform: scale(1.15); box-shadow: 0 10px 35px rgba(102, 126, 234, .3); }
+    .pos-0 { top: -45px; left: calc(50% - 45px); }
+    .pos-1 { top: calc(15% - 45px); right: calc(15% - 45px); }
+    .pos-2 { top: calc(50% - 45px); right: -45px; }
+    .pos-3 { bottom: calc(15% - 45px); right: calc(15% - 45px); }
+    .pos-4 { bottom: -45px; left: calc(50% - 45px); }
+    .pos-5 { bottom: calc(15% - 45px); left: calc(15% - 45px); }
+    .pos-6 { top: calc(50% - 45px); left: -45px; }
+    .pos-7 { top: calc(15% - 45px); left: calc(15% - 45px); }
+    .center-info, .contact-links { position: fixed; left: 50%; transform: translateX(-50%); text-align: center; color: #fff; z-index: 200; transition: .3s ease-out; opacity: 1; }
+    .center-info { top: 20px; }
+    .center-info.hidden { opacity: 0; transform: translate(-50%, -20px); }
+    .main-title { font-size: 2.5rem; font-weight: 700; margin-bottom: .5rem; }
+    .main-subtitle { font-size: 1.2rem; opacity: .9; margin-bottom: 1rem; }
+    .main-description { font-size: 1rem; opacity: .8; max-width: 600px; margin: 0 auto; line-height: 1.5; }
+    .section-title { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); font-size: 2.5rem; font-weight: 700; color: #fff; z-index: 200; opacity: 0; transition: .3s ease-out; }
+    .section-title.visible { opacity: 1; }
+    .info-panel { position: fixed; bottom: -100%; left: 0; right: 0; height: 60vh; background: rgba(255, 255, 255, .95); backdrop-filter: blur(20px); border-radius: 24px 24px 0 0; transition: .3s ease-out; z-index: 300; overflow-y: auto; padding: 30px; box-shadow: 0 -10px 40px rgba(0, 0, 0, .1); }
+    .info-panel.active { bottom: 0; }
+    .info-panel h2 { color: #2d3748; margin-bottom: 20px; font-size: 1.8rem; font-weight: 700; }
+    .info-panel .close-btn { position: absolute; top: 20px; right: 25px; background: #e2e8f0; border: none; width: 40px; height: 40px; border-radius: 50%; color: #4a5568; font-size: 1.5rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: .3s ease-out; }
+    .info-panel .close-btn:hover { background: #cbd5e0; }
+    .info-content { color: #4a5568; line-height: 1.6; }
+    .info-item { margin-bottom: 25px; padding: 20px; background: #f7fafc; border-radius: 12px; border-left: 4px solid #667eea; }
+    .info-item h3 { color: #2d3748; margin-bottom: 10px; font-weight: 600; }
+    .info-item .meta { color: #667eea; font-weight: 500; margin-bottom: 8px; }
+    .contact-links { bottom: 30px; display: flex; gap: 20px; }
+    .contact-links.hidden { opacity: 0; transform: translate(-50%, 20px); }
+    .contact-link { display: flex; align-items: center; gap: 8px; padding: 12px 20px; background: rgba(255, 255, 255, .2); border-radius: 25px; color: #fff; text-decoration: none; transition: .3s ease-out; font-weight: 500; font-size: .9rem; }
+    .contact-link:hover { background: rgba(255, 255, 255, .3); transform: translateY(-2px); }
+    .nav-instruction { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); color: #fff; opacity: .7; text-align: center; z-index: 200; font-size: .9rem; transition: .3s ease-out; }
+    .nav-instruction.hidden { opacity: 0; }
+    .nav-end { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); color: #fff; opacity: .7; text-align: center; z-index: 200; font-size: .9rem; transition: .3s ease-out; }
+    .nav-end.visible { opacity: 1; }
+    .scroll-indicator { font-size: 1.5rem; margin-top: 5px; animation: bounce 2s infinite; }
+    @keyframes bounce { 0%, 20%, 50%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-8px); } 60% { transform: translateY(-4px); } }
+    .rotate-45 { transform: translate(-50%, -50%) rotate(45deg); }
+    .rotate-90 { transform: translate(-50%, -50%) rotate(90deg); }
+    .rotate-135 { transform: translate(-50%, -50%) rotate(135deg); }
+    .rotate-180 { transform: translate(-50%, -50%) rotate(180deg); }
+    @media (max-width: 768px) {
+      .orbital-circle { width: 350px; height: 350px; }
+      .orbital-element { width: 70px; height: 70px; font-size: .7rem; padding: 8px; }
+      .center-hub { width: 120px; height: 120px; }
+      .profile-image { width: 100px; height: 100px; font-size: 2rem; }
+      .profile-image.mail-button { font-size: .8rem; padding: 8px; }
+      .main-title { font-size: 2rem; }
+      .main-subtitle { font-size: 1rem; }
+      .main-description { font-size: .9rem; padding: 0 20px; }
+      .contact-links { flex-direction: column; align-items: center; gap: 12px; }
+      .contact-link { font-size: .8rem; padding: 10px 16px; }
+      .info-panel { height: 70vh; padding: 20px; }
+      .pos-0 { top: -35px; left: calc(50% - 35px); }
+      .pos-1 { top: calc(15% - 35px); right: calc(15% - 35px); }
+      .pos-2 { top: calc(50% - 35px); right: -35px; }
+      .pos-3 { bottom: calc(15% - 35px); right: calc(15% - 35px); }
+      .pos-4 { bottom: -35px; left: calc(50% - 35px); }
+      .pos-5 { bottom: calc(15% - 35px); left: calc(15% - 35px); }
+      .pos-6 { top: calc(50% - 35px); left: -35px; }
+      .pos-7 { top: calc(15% - 35px); left: calc(15% - 35px); }
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div class="app-container">
+    <div class="center-info" :class="{ hidden: currentSection > 0 }">
+      <h1 class="main-title">Léo Proudhom</h1>
+      <p class="main-subtitle">IT Project Manager & Cloud Specialist</p>
+      <p class="main-description">Ingénieur IT spécialisé en gestion de projets et solutions cloud, avec une expertise en infrastructure réseau et cybersécurité.</p>
+    </div>
+    <h2 class="section-title" :class="{ visible: currentSection > 0 }">{{ sectionTitles[currentSection] }}</h2>
+    <div class="center-hub">
+      <a v-if="currentSection === maxSections" href="mailto:leo.proudhom@free.fr" class="profile-image mail-button">
+        <span>📧</span>
+        <span>Contactez-moi</span>
+      </a>
+      <div v-else class="profile-image">LP</div>
+    </div>
+    <div class="orbital-circle" :class="'rotate-' + (currentSection * 45)">
+      <div v-for="(element, index) in currentElements" :key="element.id" class="orbital-element visible" :class="['pos-' + (index % 8), { active: selectedElement?.id === element.id }]" @click="selectElement(element)" :style="{ transitionDelay: (index * 50) + 'ms', transform: selectedElement?.id === element.id ? 'scale(1.15)' : (currentSection === 0 ? 'scale(0)' : 'scale(1) rotate(-' + (currentSection * 45) + 'deg)') }">{{ element.name }}</div>
+    </div>
+    <div class="nav-instruction" :class="{ hidden: currentSection >= maxSections }">
+      <div>Faites défiler vers le bas pour découvrir</div>
+      <div class="scroll-indicator">↓</div>
+    </div>
+    <div class="nav-end" :class="{ visible: currentSection === maxSections }">
+      <div>Fin de la présentation - Contactez-moi ci-dessus !</div>
+    </div>
+    <div class="contact-links" :class="{ hidden: currentSection > 0 }">
+      <a href="tel:0637906816" class="contact-link">📱 06.37.90.68.16</a>
+      <a href="mailto:azertyuiop.extrem@gmail.com" class="contact-link">✉️ Contact</a>
+      <a href="https://www.linkedin.com/in/leo-proudhom" target="_blank" class="contact-link">💼 LinkedIn</a>
+    </div>
+  </div>
+  <div class="info-panel" :class="{ active: selectedElement }">
+    <button class="close-btn" @click="closePanel">&times;</button>
+    <div v-if="selectedElement">
+      <h2>{{ selectedElement.name }}</h2>
+      <div class="info-content">
+        <div v-if="selectedElement.type === 'skill'" class="info-item">
+          <div class="meta">Niveau: {{ selectedElement.level }}</div>
+          <p>{{ selectedElement.description }}</p>
+        </div>
+        <div v-else-if="selectedElement.type === 'experience'" class="info-item">
+          <h3>{{ selectedElement.position }}</h3>
+          <div class="meta">{{ selectedElement.period }} • {{ selectedElement.location }}</div>
+          <p>{{ selectedElement.description }}</p>
+        </div>
+        <div v-else-if="selectedElement.type === 'education'" class="info-item">
+          <h3>{{ selectedElement.school }}</h3>
+          <div class="meta">{{ selectedElement.period }}</div>
+          <p><strong>Spécialisation:</strong> {{ selectedElement.specialization }}</p>
+        </div>
+        <div v-else-if="selectedElement.type === 'about'" class="info-item">
+          <p>{{ selectedElement.description }}</p>
+          <h3>Langues</h3>
+          <ul>
+            <li><strong>Français:</strong> Natif</li>
+            <li><strong>Anglais:</strong> Professionnel</li>
+            <li><strong>Latin:</strong> Élémentaire</li>
+            <li><strong>Mandarin:</strong> Élémentaire</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const { createApp } = Vue;
+createApp({
+  data() {
+    return {
+      currentSection: 0,
+      maxSections: 4,
+      selectedElement: null,
+      sectionTitles: ['', 'Compétences', 'Expérience', 'Formation', 'À propos'],
+      allElements: {
+        1: [
+          { id: 'skill-1', name: 'Project Management', type: 'skill', description: "Gestion de projets IT avec méthodologies agiles et traditionnelles. Expertise en planification, coordination d'équipes et suivi de budget.", level: 'Expert' },
+          { id: 'skill-2', name: 'Cloud & Network', type: 'skill', description: "Spécialisation en architectures cloud, solutions de stockage et infrastructure réseau. Expérience avec HPE, solutions on-premise et hybrides.", level: 'Expert' },
+          { id: 'skill-3', name: 'Cybersécurité', type: 'skill', description: "Sécurisation des infrastructures, audit de sécurité et veille technologique continue. Spécialisation en SISR et infrastructures sécurisées.", level: 'Avancé' },
+          { id: 'skill-4', name: 'System Admin', type: 'skill', description: "Administration de systèmes Windows et Linux, virtualisation et automatisation des déploiements. Support utilisateur et maintenance préventive.", level: 'Expert' }
+        ],
+        2: [
+          { id: 'exp-1', name: 'HPE', type: 'experience', position: 'Technical Consultant Compute Apprentice', period: 'Octobre 2024 - Présent', location: 'Labège, Occitanie', description: "Consultant technique en alternance chez Hewlett Packard Enterprise. Spécialisation dans les solutions de calcul haute performance et accompagnement client sur les infrastructures critiques." },
+          { id: 'exp-2', name: 'TOP-TEX', type: 'experience', position: 'Assistant IT & Admin Sys', period: 'Septembre 2022 - Octobre 2024', location: 'Villeneuve-lès-Bouloc', description: "Administration systèmes et réseaux en alternance (2 ans 2 mois). Gestion du parc informatique, support utilisateur et mise en place de solutions de sécurité pour l'entreprise textile." },
+          { id: 'exp-3', name: 'Electro Depot', type: 'experience', position: 'Technicien SAV', period: 'Novembre - Décembre 2021', location: 'Toulouse', description: "Support technique après-vente pour électroménager. Utilisation de SAP pour la gestion des tickets et collaboration avec les services techniques externes (Samsung)." },
+          { id: 'exp-4', name: 'JDC Occitanie', type: 'experience', position: 'Technicien Support', period: 'Avril - Mai 2020', location: 'Saint-Jean, Occitanie', description: "Support technique sur solutions POS/TPV et équipements IT. Intervention sur site client et formation utilisateur sur les systèmes de caisse et caméras." }
+        ],
+        3: [
+          { id: 'edu-1', name: 'MS Cybersécurité', type: 'education', school: "IPI École d'Informatique", period: '2024 - 2026', specialization: 'Réseaux & Cybersécurité - Sciences informatiques et services' },
+          { id: 'edu-2', name: 'AIS', type: 'education', school: 'ADRAR Formation', period: '2023 - 2024', specialization: 'Administrateur Infrastructures Sécurisées' },
+          { id: 'edu-3', name: 'BTS SIO SISR', type: 'education', school: 'ESICAD / Henri Matisse', period: '2021 - 2023', specialization: "Services Informatiques aux Organisations - Solutions d'Infrastructure" },
+          { id: 'edu-4', name: 'BAC PRO SN', type: 'education', school: 'Lycée Stéphane Hessel', period: '2016 - 2020', specialization: 'Systèmes Numériques - Sécurité Infrastructure Habitat Tertiaire' }
+        ],
+        4: [
+          { id: 'about-1', name: 'Profil', type: 'about', description: "Ingénieur IT à mi-parcours avec une forte spécialisation en gestion de projets IT et solutions de réseau et stockage cloud. Passionné par la gestion d'infrastructure IT et la cybersécurité, je m'engage dans une surveillance technologique continue pour rester à l'avant-garde des menaces émergentes et des innovations. J'utilise des ressources de pointe, notamment le CERT et des outils de surveillance avancés comme Google Alerts, pour anticiper proactivement les risques de sécurité et mettre en œuvre des solutions robustes et avant-gardistes." },
+          { id: 'about-2', name: 'Localisation', type: 'about', description: '7 rue virginia woolf, Toulouse et périphérie. Disponible pour missions sur site et télétravail dans la région Occitanie.' },
+          { id: 'about-3', name: 'Expertise', type: 'about', description: "Spécialiste en IT avec une approche stratégique et opérationnelle. Mon expertise couvre la gestion de projets IT, l'administration d'infrastructures sécurisées, et les solutions cloud. Je me démarque par ma capacité à allier vision stratégique et excellence opérationnelle dans un environnement IT en constante évolution." },
+          { id: 'about-4', name: 'Portfolio', type: 'about', description: 'Consultez mes projets et réalisations sur lproudhom.fr. Mon portfolio détaille mes expériences techniques, mes certifications et mes contributions dans le domaine de l IT et de la cybersécurité.' }
+        ]
+      },
+      wheelTimeout: null
+    };
+  },
+  computed: {
+    currentElements() {
+      return this.allElements[this.currentSection] || [];
+    }
+  },
+  methods: {
+    selectElement(element) {
+      this.selectedElement = element;
+    },
+    closePanel() {
+      this.selectedElement = null;
+    },
+    nextSection() {
+      if (this.currentSection < this.maxSections) this.currentSection++;
+    },
+    previousSection() {
+      if (this.currentSection > 0) this.currentSection--;
+    },
+    handleWheel(e) {
+      e.preventDefault();
+      if (this.wheelTimeout) clearTimeout(this.wheelTimeout);
+      this.wheelTimeout = setTimeout(() => {
+        e.deltaY > 0 ? this.nextSection() : this.previousSection();
+      }, 50);
+    }
+  },
+  mounted() {
+    window.addEventListener('wheel', this.handleWheel, { passive: false });
+    let touchStart = 0;
+    window.addEventListener('touchstart', e => { touchStart = e.touches[0].clientY; });
+    window.addEventListener('touchend', e => {
+      const dy = touchStart - e.changedTouches[0].clientY;
+      if (Math.abs(dy) > 30) dy > 0 ? this.nextSection() : this.previousSection();
+    });
+    window.addEventListener('keydown', e => {
+      if (e.key === 'ArrowDown' || e.key === ' ') {
+        e.preventDefault();
+        this.nextSection();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        this.previousSection();
+      }
+    });
+  },
+  beforeUnmount() {
+    window.removeEventListener('wheel', this.handleWheel);
+  }
+}).mount('#app');
+</script>
+</body>
+</html>
